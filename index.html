@@ -637,7 +637,9 @@ const DEFAULT_TASKS = {
 
 // ===== State =====
 let state = loadState();
-let calYear, calMonth;
+const _now = new Date();
+let calYear = _now.getFullYear();
+let calMonth = _now.getMonth();
 
 function loadState() {
   try {
