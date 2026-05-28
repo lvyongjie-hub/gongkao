@@ -758,8 +758,8 @@
 </div>
 
 <!-- Import Modal -->
-<div class="modal-overlay" id="importModal">
-  <div class="modal" style="text-align:center">
+<div class="modal-overlay" id="importModal" onclick="this.classList.remove('active')">
+  <div class="modal" style="text-align:center" onclick="event.stopPropagation()">
     <h3>导入数据</h3>
     <p style="font-size:14px;color:var(--ink-muted-48);margin-bottom:24px">选择之前导出的 JSON 备份文件恢复打卡记录</p>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
@@ -807,8 +807,8 @@
 <div class="toast" id="toast"></div>
 
 <!-- Edit Modal -->
-<div class="modal-overlay" id="editModal">
-  <div class="modal">
+<div class="modal-overlay" id="editModal" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
     <h3>编辑学习计划</h3>
     <div id="editForm"></div>
     <div class="modal-actions">
