@@ -365,6 +365,111 @@
   .cal-day.empty { visibility: hidden; }
   .cal-day.future { color: rgba(255,255,255,0.1); }
 
+  /* ===== Countdown ===== */
+  .countdown-tile {
+    background: var(--surface-tile-1);
+    padding: 64px 24px;
+    text-align: center;
+  }
+  .countdown-days {
+    font-family: "Inter", "SF Pro Display", system-ui, sans-serif;
+    font-size: 96px; font-weight: 700; line-height: 1;
+    letter-spacing: -0.5px; color: var(--on-dark);
+  }
+  .countdown-unit {
+    font-size: 28px; font-weight: 300; color: var(--primary-on-dark);
+  }
+  .countdown-label {
+    font-size: 21px; font-weight: 600; letter-spacing: 0.231px;
+    color: var(--body-muted); margin-top: 8px;
+  }
+  .countdown-date {
+    font-size: 14px; color: rgba(255,255,255,0.4); margin-top: 4px;
+    letter-spacing: -0.224px;
+  }
+  .countdown-row {
+    display: flex; justify-content: center; gap: 48px; margin-top: 32px;
+    flex-wrap: wrap;
+  }
+  .countdown-unit-block { text-align: center; }
+  .countdown-unit-num {
+    font-family: "Inter", system-ui, sans-serif;
+    font-size: 40px; font-weight: 700; color: var(--on-dark);
+    letter-spacing: -0.28px;
+  }
+  .countdown-unit-label {
+    font-size: 12px; color: var(--body-muted); letter-spacing: -0.12px;
+  }
+
+  /* ===== Notes ===== */
+  .notes-tile {
+    background: var(--canvas-parchment);
+    padding: 80px 24px;
+  }
+  .note-area {
+    width: 100%; max-width: 700px; margin: 0 auto;
+    display: block;
+    min-height: 120px; padding: 16px 20px;
+    border: 1px solid var(--hairline); border-radius: 18px;
+    font-size: 17px; font-family: inherit; line-height: 1.47;
+    letter-spacing: -0.374px; color: var(--ink);
+    background: var(--canvas); resize: vertical;
+    outline: none; transition: border-color 0.2s;
+  }
+  .note-area:focus { border-color: var(--primary); }
+  .note-actions {
+    display: flex; gap: 12px; justify-content: center;
+    margin-top: 16px; max-width: 700px; margin-left: auto; margin-right: auto;
+  }
+  .note-history {
+    max-width: 700px; margin: 32px auto 0;
+  }
+  .note-item {
+    padding: 16px 20px; border-bottom: 1px solid var(--divider-soft);
+  }
+  .note-item:last-child { border-bottom: none; }
+  .note-date {
+    font-size: 12px; font-weight: 600; color: var(--primary);
+    letter-spacing: -0.12px; margin-bottom: 6px;
+  }
+  .note-text {
+    font-size: 14px; color: var(--ink-muted-80); line-height: 1.43;
+    letter-spacing: -0.224px; white-space: pre-wrap;
+  }
+
+  /* ===== Achievements ===== */
+  .achievements-tile {
+    background: var(--canvas);
+    padding: 80px 24px;
+  }
+  .badge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px; max-width: 700px; margin: 0 auto;
+  }
+  .badge {
+    text-align: center; padding: 24px 12px;
+    border-radius: 18px; border: 1px solid var(--hairline);
+    transition: all 0.3s;
+  }
+  .badge.locked { opacity: 0.35; filter: grayscale(1); }
+  .badge.unlocked {
+    border-color: rgba(0,102,204,0.2);
+    background: rgba(0,102,204,0.03);
+  }
+  .badge-icon {
+    font-size: 40px; margin-bottom: 8px;
+  }
+  .badge-name {
+    font-size: 14px; font-weight: 600; color: var(--ink);
+    letter-spacing: -0.224px;
+  }
+  .badge-desc {
+    font-size: 11px; color: var(--ink-muted-48); margin-top: 4px;
+    letter-spacing: -0.08px;
+  }
+  .badge.unlocked .badge-name { color: var(--primary); }
+
   /* ===== Motivation ===== */
   .motivation-tile {
     background: var(--canvas-parchment);
@@ -593,6 +698,45 @@
   </div>
 </div>
 
+<!-- Exam Countdown -->
+<div class="countdown-tile" id="countdown">
+  <h2 class="section-head-light">考试倒计时</h2>
+  <p class="section-sub-light" style="color:var(--body-muted)">距离目标考试还有</p>
+  <div class="countdown-days" id="cdDays">--</div>
+  <div class="countdown-unit">天</div>
+  <div class="countdown-label" id="cdLabel">请设置考试日期</div>
+  <div class="countdown-row" id="cdDetail"></div>
+  <div style="margin-top:24px;display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap">
+    <select id="cdPreset" style="padding:8px 14px;border:1px solid rgba(255,255,255,0.15);border-radius:10px;font-size:14px;font-family:inherit;background:var(--surface-tile-2);color:var(--on-dark);outline:none">
+      <option value="">选择预设日期</option>
+      <option value="2026-11-29">2026 国考（11.29）</option>
+      <option value="2026-03-15">2026 省考（3.15）</option>
+      <option value="2026-12-07">2027 国考（12.07）</option>
+    </select>
+    <input type="date" id="cdCustom" style="padding:8px 14px;border:1px solid rgba(255,255,255,0.15);border-radius:10px;font-size:14px;font-family:inherit;background:var(--surface-tile-2);color:var(--on-dark);outline:none">
+    <button class="btn-primary" style="font-size:14px;padding:8px 20px" onclick="setExamDate()">设置</button>
+  </div>
+</div>
+
+<!-- Daily Notes -->
+<div class="notes-tile" id="notes">
+  <h2 class="section-head">每日笔记</h2>
+  <p class="section-sub">记录今日学习心得，复盘才能进步</p>
+  <textarea class="note-area" id="noteInput" placeholder="今天学了什么？有什么收获或困惑？写下来..."></textarea>
+  <div class="note-actions">
+    <button class="btn-primary" style="font-size:14px;padding:8px 20px" onclick="saveNote()">保存笔记</button>
+    <button class="btn-secondary" style="font-size:14px;padding:8px 20px" onclick="document.getElementById('noteInput').value=''">清空</button>
+  </div>
+  <div class="note-history" id="noteHistory"></div>
+</div>
+
+<!-- Achievements -->
+<div class="achievements-tile" id="achievements">
+  <h2 class="section-head">成就徽章</h2>
+  <p class="section-sub">坚持打卡，解锁专属成就</p>
+  <div class="badge-grid" id="badgeGrid"></div>
+</div>
+
 <!-- Motivation -->
 <section class="motivation-tile">
   <p class="motivation-quote">不积跬步，无以至千里；<br>不积小流，无以成江海。</p>
@@ -640,7 +784,10 @@
       <h4>功能</h4>
       <a onclick="checkInAll()">一键打卡</a>
       <a onclick="document.getElementById('calendar').scrollIntoView({behavior:'smooth'})">打卡日历</a>
+      <a onclick="document.getElementById('countdown').scrollIntoView({behavior:'smooth'})">考试倒计时</a>
       <a onclick="document.getElementById('scores').scrollIntoView({behavior:'smooth'})">模考成绩</a>
+      <a onclick="document.getElementById('notes').scrollIntoView({behavior:'smooth'})">每日笔记</a>
+      <a onclick="document.getElementById('achievements').scrollIntoView({behavior:'smooth'})">成就徽章</a>
       <a onclick="exportData()">导出数据</a>
       <a onclick="importData()">导入数据</a>
       <a onclick="editTasks()">编辑计划</a>
@@ -991,6 +1138,124 @@ function renderAll() {
   renderTasks();
   renderStats();
   renderCalendar();
+  renderCountdown();
+  renderNotes();
+  renderAchievements();
+}
+
+// ===== Exam Countdown =====
+function loadExamDate() { return state.examDate || ''; }
+function setExamDate() {
+  const preset = document.getElementById('cdPreset').value;
+  const custom = document.getElementById('cdCustom').value;
+  const date = preset || custom;
+  if (!date) { showToast('请选择考试日期'); return; }
+  state.examDate = date;
+  save();
+  renderCountdown();
+  showToast('考试日期已设置：' + date);
+}
+function renderCountdown() {
+  const date = loadExamDate();
+  if (!date) { document.getElementById('cdDays').textContent = '--'; document.getElementById('cdDetail').innerHTML = ''; return; }
+  const target = new Date(date + 'T00:00:00');
+  const now = new Date();
+  const diff = target - now;
+  if (diff <= 0) {
+    document.getElementById('cdDays').textContent = '0';
+    document.getElementById('cdLabel').textContent = '考试已结束，加油！';
+    document.getElementById('cdDetail').innerHTML = '';
+    return;
+  }
+  const days = Math.ceil(diff / 86400000);
+  document.getElementById('cdDays').textContent = days;
+  document.getElementById('cdLabel').textContent = date.replace(/-/g, '年').replace(/年(\d+)$/, '月$1日');
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  document.getElementById('cdDetail').innerHTML =
+    `<div class="countdown-unit-block"><div class="countdown-unit-num">${days}</div><div class="countdown-unit-label">天</div></div>` +
+    `<div class="countdown-unit-block"><div class="countdown-unit-num">${h}</div><div class="countdown-unit-label">时</div></div>` +
+    `<div class="countdown-unit-block"><div class="countdown-unit-num">${m}</div><div class="countdown-unit-label">分</div></div>` +
+    `<div class="countdown-unit-block"><div class="countdown-unit-num">${s}</div><div class="countdown-unit-label">秒</div></div>`;
+}
+setInterval(renderCountdown, 1000);
+
+// ===== Daily Notes =====
+function loadNotes() { return state.notes || []; }
+function saveNote() {
+  const text = document.getElementById('noteInput').value.trim();
+  if (!text) { showToast('请输入笔记内容'); return; }
+  const notes = loadNotes();
+  notes.unshift({ date: todayStr(), time: new Date().toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'}), text });
+  state.notes = notes;
+  save();
+  document.getElementById('noteInput').value = '';
+  renderNotes();
+  showToast('笔记已保存');
+}
+function renderNotes() {
+  const notes = loadNotes();
+  const el = document.getElementById('noteHistory');
+  if (!notes.length) { el.innerHTML = '<p style="text-align:center;color:var(--ink-muted-48);font-size:14px;padding:24px">还没有笔记，写点什么吧 ✍️</p>'; return; }
+  el.innerHTML = notes.slice(0, 20).map(n =>
+    `<div class="note-item"><div class="note-date">${n.date} ${n.time || ''}</div><div class="note-text">${n.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>`
+  ).join('');
+}
+
+// ===== Achievements =====
+const BADGES = [
+  { id: 'first', icon: '🌟', name: '初出茅庐', desc: '完成第一次打卡', check: s => totalCheckedDays(s) >= 1 },
+  { id: 'streak3', icon: '🔥', name: '三天打鱼', desc: '连续打卡 3 天', check: s => calcStreak(s) >= 3 },
+  { id: 'streak7', icon: '⚡', name: '一周不歇', desc: '连续打卡 7 天', check: s => calcStreak(s) >= 7 },
+  { id: 'streak14', icon: '💪', name: '两周战士', desc: '连续打卡 14 天', check: s => calcStreak(s) >= 14 },
+  { id: 'streak30', icon: '🏆', name: '月度冠军', desc: '连续打卡 30 天', check: s => calcStreak(s) >= 30 },
+  { id: 'streak100', icon: '👑', name: '百日王者', desc: '连续打卡 100 天', check: s => calcStreak(s) >= 100 },
+  { id: 'total7', icon: '📚', name: '学海初航', desc: '累计打卡 7 天', check: s => totalCheckedDays(s) >= 7 },
+  { id: 'total30', icon: '🎓', name: '学有所成', desc: '累计打卡 30 天', check: s => totalCheckedDays(s) >= 30 },
+  { id: 'total100', icon: '🥇', name: '百炼成钢', desc: '累计打卡 100 天', check: s => totalCheckedDays(s) >= 100 },
+  { id: 'full1', icon: '✅', name: '完美一天', desc: '单日全部任务打卡', check: s => hasFullDay(s) },
+  { id: 'full7', icon: '🌈', name: '全勤一周', desc: '连续 7 天全部打卡', check: s => hasFullStreak(s, 7) },
+  { id: 'note1', icon: '📝', name: '笔记达人', desc: '写下第一篇笔记', check: s => (s.notes||[]).length >= 1 },
+  { id: 'note10', icon: '📖', name: '复盘专家', desc: '累计 10 篇笔记', check: s => (s.notes||[]).length >= 10 },
+  { id: 'score1', icon: '📈', name: '模考首秀', desc: '记录第一次模考成绩', check: s => (s.scores||[]).length >= 1 },
+  { id: 'score10', icon: '📊', name: '数据达人', desc: '记录 10 次模考成绩', check: s => (s.scores||[]).length >= 10 },
+];
+function totalCheckedDays(s) { return Object.values(s.checks||{}).filter(v => v.length > 0).length; }
+function calcStreak(s) {
+  let streak = 0; const d = new Date();
+  const total = allTaskIds().length;
+  while (true) {
+    const k = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const c = (s.checks||{})[k] || [];
+    if (c.length > 0) { streak++; d.setDate(d.getDate()-1); } else break;
+  }
+  return streak;
+}
+function hasFullDay(s) {
+  const total = allTaskIds().length;
+  return Object.values(s.checks||{}).some(v => v.length >= total);
+}
+function hasFullStreak(s, n) {
+  let streak = 0; const d = new Date();
+  const total = allTaskIds().length;
+  while (true) {
+    const k = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const c = (s.checks||{})[k] || [];
+    if (c.length >= total) { streak++; d.setDate(d.getDate()-1); } else break;
+  }
+  return streak >= n;
+}
+function renderAchievements() {
+  const el = document.getElementById('badgeGrid');
+  el.innerHTML = BADGES.map(b => {
+    const unlocked = b.check(state);
+    return `<div class="badge ${unlocked ? 'unlocked' : 'locked'}">
+      <div class="badge-icon">${b.icon}</div>
+      <div class="badge-name">${b.name}</div>
+      <div class="badge-desc">${b.desc}</div>
+    </div>`;
+  }).join('');
 }
 
 // ===== Timer =====
