@@ -1,0 +1,16 @@
+{
+  "name": "公考上岸 · 每日打卡",
+  "short_name": "公考打卡",
+  "description": "公考备考每日打卡学习计划",
+  "start_url": "/gongkao/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✅</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

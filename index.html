@@ -6,6 +6,12 @@
 <title>公考上岸 · 每日打卡</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✅</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   /* ===== Apple Design Tokens ===== */
   :root {
@@ -125,6 +131,27 @@
     border-color: rgba(52, 199, 89, 0.3);
     pointer-events: none;
   }
+
+  /* ===== Timer ===== */
+  .timer-row { display: flex; gap: 6px; margin-top: 12px; }
+  .btn-timer {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--canvas-parchment); color: var(--ink-muted-80);
+    font-size: 12px; font-weight: 600; letter-spacing: -0.12px;
+    border: 1px solid var(--hairline); border-radius: 9999px;
+    padding: 5px 12px; cursor: pointer; font-family: inherit;
+    transition: all 0.2s; gap: 4px;
+  }
+  .btn-timer:hover { border-color: var(--primary); color: var(--primary); }
+  .btn-timer.running { background: rgba(0,102,204,0.08); color: var(--primary); border-color: rgba(0,102,204,0.3); }
+  .btn-timer.running::before { content: '⏱ '; }
+  .timer-display {
+    font-size: 12px; font-weight: 600; color: var(--primary);
+    letter-spacing: -0.12px; padding: 5px 10px;
+    background: rgba(0,102,204,0.06); border-radius: 9999px;
+    font-variant-numeric: tabular-nums;
+  }
+  .timer-display.done { background: var(--success-light); color: #1b8a3e; }
 
   /* ===== Hero ===== */
   .hero {
@@ -485,6 +512,8 @@
     <a href="#plan">计划</a>
     <a href="#calendar">日历</a>
     <a onclick="editTasks()">编辑</a>
+    <a onclick="exportData()">导出</a>
+    <a onclick="importData()">导入</a>
     <a onclick="if(confirm('确定要重置所有数据吗？')){localStorage.clear();location.reload()}">重置</a>
   </div>
 </nav>
@@ -570,6 +599,31 @@
   <p class="motivation-author">—— 荀子《劝学》</p>
 </section>
 
+<!-- Score Chart -->
+<div class="tile-light" id="scores">
+  <h2 class="section-head">模考成绩</h2>
+  <p class="section-sub">记录每次模考分数，见证成长曲线</p>
+  <div style="max-width:700px;margin:0 auto">
+    <canvas id="scoreChart" height="250"></canvas>
+    <div style="display:flex;gap:12px;margin-top:24px;justify-content:center;flex-wrap:wrap">
+      <input type="number" id="scoreInput" placeholder="行测分数" style="width:120px;padding:8px 14px;border:1px solid var(--hairline);border-radius:10px;font-size:14px;font-family:inherit;color:var(--ink);outline:none">
+      <input type="number" id="scoreInput2" placeholder="申论分数" style="width:120px;padding:8px 14px;border:1px solid var(--hairline);border-radius:10px;font-size:14px;font-family:inherit;color:var(--ink);outline:none">
+      <button class="btn-primary" style="font-size:14px;padding:8px 20px" onclick="addScore()">记录成绩</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import Modal -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal" style="text-align:center">
+    <h3>导入数据</h3>
+    <p style="font-size:14px;color:var(--ink-muted-48);margin-bottom:24px">选择之前导出的 JSON 备份文件恢复打卡记录</p>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+    <button class="btn-primary" onclick="document.getElementById('importFile').click()" style="font-size:17px;padding:11px 32px">选择文件</button>
+    <div style="margin-top:16px"><button class="btn-secondary" onclick="document.getElementById('importModal').classList.remove('active')" style="font-size:14px;padding:8px 18px">取消</button></div>
+  </div>
+</div>
+
 <!-- Footer -->
 <footer class="footer">
   <div class="footer-inner">
@@ -586,7 +640,9 @@
       <h4>功能</h4>
       <a onclick="checkInAll()">一键打卡</a>
       <a onclick="document.getElementById('calendar').scrollIntoView({behavior:'smooth'})">打卡日历</a>
+      <a onclick="document.getElementById('scores').scrollIntoView({behavior:'smooth'})">模考成绩</a>
       <a onclick="exportData()">导出数据</a>
+      <a onclick="importData()">导入数据</a>
       <a onclick="editTasks()">编辑计划</a>
     </div>
     <div class="footer-col">
@@ -715,6 +771,13 @@ function renderTasks() {
         <div class="task-name">${t.name}</div>
         <div class="task-desc">${t.desc}</div>
         <div class="task-meta"><span class="task-time">${t.time || ''}</span></div>
+        <div class="timer-row">
+          <button class="btn-timer" onclick="startTimer('${t.id}',25)">25min</button>
+          <button class="btn-timer" onclick="startTimer('${t.id}',30)">30min</button>
+          <button class="btn-timer" onclick="startTimer('${t.id}',45)">45min</button>
+          <span class="timer-display" id="timer-${t.id}"></span>
+          <button class="btn-timer" onclick="stopTimer('${t.id}')" style="color:var(--ink-muted-48)">停止</button>
+        </div>
       </div>`;
     }).join('');
   });
@@ -930,9 +993,132 @@ function renderAll() {
   renderCalendar();
 }
 
+// ===== Timer =====
+const timers = {};
+function startTimer(id, mins) {
+  if (timers[id]) { clearInterval(timers[id].interval); delete timers[id]; }
+  const end = Date.now() + mins * 60 * 1000;
+  timers[id] = { end, interval: null };
+  const render = () => {
+    const left = Math.max(0, end - Date.now());
+    const m = Math.floor(left / 60000);
+    const s = Math.floor((left % 60000) / 1000);
+    const el = document.getElementById('timer-' + id);
+    if (!el) { clearInterval(timers[id].interval); return; }
+    el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    if (left <= 0) {
+      clearInterval(timers[id].interval);
+      el.textContent = '⏰ 时间到！';
+      el.classList.add('done');
+      try { new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=').play(); } catch(e) {}
+      showToast('⏰ ' + mins + ' 分钟计时结束！');
+    }
+  };
+  render();
+  timers[id].interval = setInterval(render, 1000);
+  showToast('⏱ ' + mins + ' 分钟计时开始');
+}
+
+function stopTimer(id) {
+  if (timers[id]) { clearInterval(timers[id].interval); delete timers[id]; }
+  const el = document.getElementById('timer-' + id);
+  if (el) { el.textContent = ''; el.classList.remove('done'); }
+}
+
+// ===== Score Chart =====
+let scoreChart = null;
+function loadScores() {
+  return state.scores || [];
+}
+function saveScores(scores) {
+  state.scores = scores;
+  save();
+}
+function addScore() {
+  const xce = parseFloat(document.getElementById('scoreInput').value);
+  const sl = parseFloat(document.getElementById('scoreInput2').value);
+  if (isNaN(xce) && isNaN(sl)) { showToast('请输入分数'); return; }
+  const scores = loadScores();
+  scores.push({ date: todayStr(), xce: xce || 0, sl: sl || 0 });
+  scores.sort((a, b) => a.date.localeCompare(b.date));
+  saveScores(scores);
+  document.getElementById('scoreInput').value = '';
+  document.getElementById('scoreInput2').value = '';
+  renderChart();
+  showToast('成绩已记录');
+}
+function renderChart() {
+  const scores = loadScores();
+  if (!scores.length) return;
+  const labels = scores.map(s => s.date.slice(5));
+  const xceData = scores.map(s => s.xce || null);
+  const slData = scores.map(s => s.sl || null);
+  if (scoreChart) scoreChart.destroy();
+  scoreChart = new Chart(document.getElementById('scoreChart'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: '行测', data: xceData, borderColor: '#0066cc', backgroundColor: 'rgba(0,102,204,0.08)', tension: 0.3, fill: true, pointRadius: 4, pointBackgroundColor: '#0066cc' },
+        { label: '申论', data: slData, borderColor: '#34c759', backgroundColor: 'rgba(52,199,89,0.08)', tension: 0.3, fill: true, pointRadius: 4, pointBackgroundColor: '#34c759' },
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'top', labels: { font: { family: 'Inter', size: 13 }, usePointStyle: true, padding: 20 } } },
+      scales: {
+        y: { min: 0, max: 100, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { family: 'Inter', size: 12 } } },
+        x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 12 } } }
+      }
+    }
+  });
+}
+
+// ===== Import / Export =====
+function importData() {
+  document.getElementById('importModal').classList.add('active');
+}
+function handleImport(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (data.checks) {
+        localStorage.setItem('gongkao_state', JSON.stringify(data));
+        showToast('数据导入成功！');
+        setTimeout(() => location.reload(), 800);
+      } else {
+        showToast('文件格式不正确');
+      }
+    } catch(err) {
+      showToast('导入失败：文件解析错误');
+    }
+  };
+  reader.readAsText(file);
+  document.getElementById('importModal').classList.remove('active');
+}
+
+function exportData() {
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '公考打卡备份_' + todayStr() + '.json';
+  a.click();
+  showToast('数据已导出（JSON 格式，可导入恢复）');
+}
+
+// ===== PWA =====
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
 // ===== Init =====
 renderAll();
 initCalendar();
+renderChart();
 </script>
 </body>
 </html>
